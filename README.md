@@ -57,7 +57,7 @@ Your support, no matter how big or small, is highly appreciated and helps keep t
 
 ## License
 
-This project is proprietary and is protected under an "All Rights Reserved" license. No part of this repository may be reproduced, distributed, or transmitted without the prior written permission of the copyright holder.
+Do whatever you want.
 
 
 
