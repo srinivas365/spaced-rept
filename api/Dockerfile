@@ -11,7 +11,7 @@ RUN npm install
 
 COPY . .
 
-RUN cd config && ln -sf dev_config.js config.js
+RUN cd config && ln -sf prod_config.js config.js
 
 ENV NODE_OPTIONS=--max_old_space_size=14000
 
