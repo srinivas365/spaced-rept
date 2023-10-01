@@ -1,0 +1,7 @@
+data/
+
+api/node_modules/
+api/package-lock.json
+
+ui/node_modules
+ui/package-lock.json
