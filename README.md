@@ -46,4 +46,19 @@ Ready to supercharge your learning? Join spaced-rept and experience the power of
 3. Go to localhost:8080. Enjoy
 4. docker-compose down 
 
+## Support
+
+If you find this project helpful and would like to support its development, you can contribute by buying me a coffee. Your support will help me cover server costs, fund further development, and ensure the project's sustainability.
+
+- [Buy Me a Coffee](https://www.buymeacoffee.com/msrinivas365)
+
+Your support, no matter how big or small, is highly appreciated and helps keep this project going. Thank you for buying me a coffee!
+
+
+## License
+
+This project is proprietary and is protected under an "All Rights Reserved" license. No part of this repository may be reproduced, distributed, or transmitted without the prior written permission of the copyright holder.
+
+
+
 
