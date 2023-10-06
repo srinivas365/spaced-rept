@@ -60,5 +60,10 @@ Your support, no matter how big or small, is highly appreciated and helps keep t
 Do whatever you want.
 
 
+## Upcoming features
+1. Support Multiple users and enable Signup & Login flows
+2. Dashboard to track the progress and displaying pending/missed submissions. 
+
+
 
 
