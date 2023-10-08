@@ -78,6 +78,14 @@ const getAllSubmissions = async (from, to) => {
     }
   });
 
+  const pendingCount = await db.submission.count({
+    where: {
+      dtCreated: { [Op.between]: [ fromDate, toDate] },
+      done: 0
+    }
+  })
+
+
   submittedList = submittedList.map((submission) => ({
     id: submission.id,
     name: submission.category,
@@ -93,7 +101,61 @@ const getAllSubmissions = async (from, to) => {
     done: submission.done,
   }));
 
-  return submittedList;
+  return { submittedList, pendingCount };
+}
+
+const getSummary = async (from, to) => {
+  const fromDate = moment(from).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+  const toDate = moment(to).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+
+  let pendingList = await db.submission.findAll({
+    attributes: [
+      [sequelize.fn('DATE', sequelize.col('dtCreated')), 'dtCreated'],
+      [sequelize.fn('COUNT', sequelize.literal('1')), 'pendingCount'],
+    ],
+    where: {
+      done: 0,
+      dtCreated: { [Op.between]: [ fromDate, toDate] }
+    },
+    group: [sequelize.fn('DATE', sequelize.col('dtCreated'))],
+    raw: true
+  });
+
+  let doneList = await db.submission.findAll({
+    attributes: [
+      [sequelize.fn('DATE', sequelize.col('dtCreated')), 'dtCreated'],
+      [sequelize.fn('COUNT', sequelize.literal('1')), 'doneCount'],
+    ],
+    where: {
+      done: 1,
+      dtCreated: { [Op.between]: [ fromDate, toDate] }
+    },
+    group: [sequelize.fn('DATE', sequelize.col('dtCreated'))],
+    raw: true
+  });
+
+  const pendingCount = await db.submission.count({
+    where: {
+      dtCreated: { [Op.between]: [ fromDate, toDate] },
+      done: 0
+    }
+  });
+
+  pendingList = pendingList.map((submission) => ({
+    start: moment(submission.dtCreated).format('YYYY-MM-DD'),
+    color: 'pink',
+    timed: 0,
+    name: `${submission.pendingCount} pending`,
+  }));
+
+  doneList = doneList.map((submission) => ({
+    start: moment(submission.dtCreated).format('YYYY-MM-DD'),
+    color: 'green',
+    timed: 0,
+    name: `${submission.doneCount} done`,
+  }));
+
+  return { submittedList: [...doneList, ...pendingList], pendingCount };
 }
 
 const getCurrentDaySubmits = async (category, type, level) => {
@@ -117,5 +179,6 @@ module.exports = {
   getOffset,
   insertSubmission,
   getAllSubmissions,
-  getCurrentDaySubmits
+  getCurrentDaySubmits,
+  getSummary
 }

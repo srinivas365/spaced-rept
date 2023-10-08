@@ -20,7 +20,7 @@ const sequelize = new Sequelize(
         multipleStatements: true,
         connectTimeout: 1000 * 60 * 10
     },
-    logging: false, 
+    logging: console.log, 
     logQueryParameters: true,
     define: {
         timestamps: false,

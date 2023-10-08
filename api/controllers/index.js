@@ -1,5 +1,5 @@
 const express = require('express');
-const { getTypes, getLevels, getCategories, getOffset, insertSubmission, getAllSubmissions, getCurrentDaySubmits } = require('../services');
+const { getTypes, getLevels, getCategories, getOffset, insertSubmission, getAllSubmissions, getCurrentDaySubmits, getSummary } = require('../services');
 const router = express.Router();
 const moment = require('moment');
 const logger = require('../config/logger');
@@ -62,6 +62,19 @@ router.post('/submissions/all', async (req, res) => {
     res.status(500).json({ status: 0 });
   }
 });
+
+router.post('/submissions/summary', async (req, res) => {
+  try {
+    const from = req.body.from;
+    const to = req.body.to;
+    const data = await getSummary(from, to);
+    res.status(200).json(data);
+  } catch (error) {
+    logger.error(`Error handing getting submissions: ${error.stack}`);
+    res.status(500).json({ status: 0 });
+  }
+});
+
 
 router.post('/submissions/insert', async (req, res) => {
   try {
@@ -148,6 +161,8 @@ router.post('/submissions/update', async (req, res) => {
     res.status(500).json({ status: 0 });
   }
 });
+
+
 
 module.exports = router;
 
