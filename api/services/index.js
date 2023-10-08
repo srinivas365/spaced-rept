@@ -155,7 +155,7 @@ const getSummary = async (from, to) => {
     name: `${submission.doneCount} done`,
   }));
 
-  return { submittedList: [...doneList, ...pendingList], pendingCount };
+  return { submittedList: [ ...pendingList, ...doneList ], pendingCount };
 }
 
 const getCurrentDaySubmits = async (category, type, level) => {
