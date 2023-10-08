@@ -9,6 +9,7 @@ export default {
   submission: {
     get: {
       all: '/api/submissions/all',
+      summary: '/api/submissions/summary'
     },
     set: {
       one: '/api/submissions/insert'

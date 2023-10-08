@@ -9,7 +9,9 @@ export default new Vuex.Store({
     sp_categories: [],
     sp_levels: [],
     sp_types: [],
-    sp_submissions: []
+    sp_submissions: [],
+    sp_pending_count: 0,
+    sp_summary: [],
   },
   mutations: {
     FETCH_METADATA: (state, payload) => {
@@ -21,7 +23,12 @@ export default new Vuex.Store({
       state.sp_submissions = [ ...state.sp_submissions, ...payload];
     },
     FETCH_SUBMISSIONS: (state, payload) => {
-      state.sp_submissions = payload;
+      state.sp_submissions = payload.submittedList;
+      state.sp_pending_count = payload.pendingCount;
+    },
+    FETCH_SUMMARY: (state, payload) => {
+      state.sp_summary = payload.submittedList;
+      state.sp_pending_count = payload.pendingCount;
     }
   },
   actions: {
@@ -36,6 +43,10 @@ export default new Vuex.Store({
     async fetchSubmissions({ commit }, payload){
       const resp = await this.$axios.post(API_PATH.submission.get.all, payload);
       resp.data && commit('FETCH_SUBMISSIONS', resp.data);
+    },
+    async fetchSummary({ commit }, payload){
+      const resp = await this.$axios.post(API_PATH.submission.get.summary, payload);
+      resp.data && commit('FETCH_SUMMARY', resp.data);
     },
     async updateSubmission({ commit }, payload){
       const resp = await this.$axios.post(API_PATH.submission.update.one, payload);

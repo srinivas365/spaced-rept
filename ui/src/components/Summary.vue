@@ -39,16 +39,13 @@
         v-model="value"
         :weekdays="weekday"
         :type="type"
-        :events="sp_events"
+        :events="sp_summary"
         :event-overlap-mode="mode"
         :event-overlap-threshold="0"
         :event-color="getEventColor"
         :interval-minutes="30"
         :interval-count="48"
         @change="getEvents"
-        @click:event="showEvent"
-        @click:more="viewDay"
-        @click:date="viewDay"
         :event-margin-bottom="5"
       ></v-calendar>
       <v-menu
@@ -134,8 +131,8 @@ export default {
     sp_types() {
       return this.$store.state.sp_types;
     },
-    sp_events() {
-      return this.$store.state.sp_submissions;
+    sp_summary() {
+      return this.$store.state.sp_summary;
     },
     sp_pending_count() {
       return this.$store.state.sp_pending_count;
@@ -158,7 +155,7 @@ export default {
     getEvents({ start, end }) {
       console.log(start.date);
       console.log(end.date);
-      this.$store.dispatch("fetchSubmissions", {
+      this.$store.dispatch("fetchSummary", {
         from: start.date,
         to: end.date,
       });
@@ -208,7 +205,16 @@ export default {
 </script>
 
 <style>
+
 .v-event {
   margin-left: 5px;
+  margin-top: 10px;
+  border-radius: 100px;
+  background-color: #1867c0;
+  color: #ffffff;
+  border: 1px solid #1867c0;
+  font-size: 20px;
+  cursor: pointer;
+  position: relative;
 }
 </style>

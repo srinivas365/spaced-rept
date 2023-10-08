@@ -7,7 +7,7 @@
     mini-variant-width="80"
   >
     <v-avatar class="d-block text-center mx-auto mt-4 mb-16" color="" size="40">
-      <v-icon color="white" x-large>fab fa-artstation</v-icon>
+      <v-icon color="white" x-large @click="showSummary">fab fa-artstation</v-icon>
     </v-avatar>
 
     <div
@@ -93,6 +93,7 @@ export default {
   data: () => ({
     link: '',
     submitType: '',
+    summary_flag: false,
     level: '',
     category: '',
     dialog: false,
@@ -129,6 +130,17 @@ export default {
       this.level = '';
       this.link = '';
     },
+
+    showSummary(){
+      if(this.summary_flag == false){
+        window.location.href = '/summary';
+        this.summary_flag = true;
+      } else {
+        window.location.href = '/';
+        this.summary_flag = false;
+      }
+      
+    }
   },
   computed: {
     sp_levels(){
