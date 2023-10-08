@@ -13,7 +13,11 @@ Spaced Repetition is a revolutionary learning technique that optimizes your memo
 - work on it and update it to revise again and again
 <br><br>
 ![img](images/3.png)
-
+<br><br>
+- track the done & pending items
+<br><br>
+![img](images/4.png)
+<br><br>
 ### Say Goodbye to Cramming
 
 Tired of last-minute cramming sessions? spaced-rept helps you move away from cramming and embrace effective learning. We believe in spaced repetition, a proven technique to help you remember what you've learned for the long term.
@@ -61,8 +65,7 @@ Do whatever you want.
 
 
 ## Upcoming features
-1. Support Multiple users and enable Signup & Login flows
-2. Dashboard to track the progress and displaying pending/missed submissions. 
+1. Support Multiple users and enable Signup & Login flows 
 
 
 
