@@ -9,7 +9,8 @@ export default {
   submission: {
     get: {
       all: '/api/submissions/all',
-      summary: '/api/submissions/summary'
+      summary: '/api/submissions/summary',
+      progress: '/api/weekly_progress',
     },
     set: {
       one: '/api/submissions/insert'

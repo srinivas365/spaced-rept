@@ -1,5 +1,11 @@
 <template>
-  <v-card color="white" class="rounded-lg" flat>
+  <div>
+    <VueApexCharts
+      type="radar"
+      height="750"
+      :options="chart_options"
+      :series="chart_series"
+    ></VueApexCharts>
     <v-sheet tile height="64" class="d-flex">
       <v-toolbar flat>
         <v-btn icon class="ma-2" @click="$refs.calendar.prev()">
@@ -59,7 +65,9 @@
         <v-card color="grey lighten-4" min-width="200px" flat>
           <v-card-text>
             <!-- <span v-html="selectedEvent.link"></span> -->
-            <a :href="selectedEvent.link" target="_blank">{{ selectedEvent.link }}</a>
+            <a :href="selectedEvent.link" target="_blank">{{
+              selectedEvent.link
+            }}</a>
           </v-card-text>
           <v-row style="margin: 10px" v-if="selectedEvent.done !== 1">
             <v-col cols="12" sm="3">
@@ -88,15 +96,21 @@
         </v-card>
       </v-menu>
     </v-sheet>
-  </v-card>
+  </div>
 </template>
 
 <script>
+import VueApexCharts from "vue-apexcharts";
+
 export default {
   async mounted() {
     console.log(":::::::::::::::::on mounted");
-    this.$refs.calendar.checkChange();
-    this.$store.dispatch("fetchMetadata");
+    await this.$refs.calendar.checkChange();
+    await this.$store.dispatch("fetchMetadata");
+    await this.$store.dispatch("fetchProgress");
+  },
+  components: {
+    VueApexCharts,
   },
   data: () => ({
     selectedElementLevel: "",
@@ -139,6 +153,64 @@ export default {
     },
     sp_pending_count() {
       return this.$store.state.sp_pending_count;
+    },
+    chart_series() {
+      return [
+        {
+          name: "progress",
+          data: this.$store.state.pg_values,
+        },
+      ];
+    },
+    chart_options() {
+      return {
+        chart: {
+          height: 750,
+          type: "radar",
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        plotOptions: {
+          radar: {
+            size: 300,
+            polygons: {
+              strokeColors: "#e9e9e9",
+              fill: {
+                colors: ["#f8f8f8", "#fff"],
+              },
+            },
+          },
+        },
+        title: {
+          text: "This week progress",
+        },
+        colors: ["#FF4560"],
+        markers: {
+          size: 4,
+          colors: ["#fff"],
+          strokeColor: "#FF4560",
+          strokeWidth: 1,
+        },
+        tooltip: {
+          y: {
+            formatter: function (val) {
+              return val;
+            },
+          },
+        },
+        yaxis: {
+          tickAmount: 7,
+          labels: {
+            formatter: function () {
+              return "";
+            },
+          },
+        },
+        xaxis: {
+          categories: this.$store.state.pg_categories,
+        },
+      };
     },
   },
   methods: {
@@ -183,7 +255,6 @@ export default {
       this.$refs.calendar.next();
     },
     showEvent({ nativeEvent, event }) {
-      console.log("Event:::::::::::::::::::::::::::::::::::::", event);
       const open = () => {
         this.selectedEvent = event;
         this.selectedElement = nativeEvent.target;
@@ -191,7 +262,6 @@ export default {
           requestAnimationFrame(() => (this.selectedOpen = true));
         });
       };
-
       if (this.selectedOpen) {
         this.selectedOpen = false;
         requestAnimationFrame(() => {
@@ -200,7 +270,6 @@ export default {
       } else {
         open();
       }
-
       nativeEvent.stopPropagation();
     },
   },

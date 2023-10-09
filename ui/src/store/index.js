@@ -12,6 +12,8 @@ export default new Vuex.Store({
     sp_submissions: [],
     sp_pending_count: 0,
     sp_summary: [],
+    pg_categories: [],
+    pg_values: []
   },
   mutations: {
     FETCH_METADATA: (state, payload) => {
@@ -29,7 +31,11 @@ export default new Vuex.Store({
     FETCH_SUMMARY: (state, payload) => {
       state.sp_summary = payload.submittedList;
       state.sp_pending_count = payload.pendingCount;
-    }
+    },
+    FETCH_PROGRESS: (state, payload) => {
+      state.pg_categories = payload.map(item => item.category);
+      state.pg_values = payload.map(item => parseInt(item.progress));
+    },
   },
   actions: {
     async fetchMetadata({ commit }){
@@ -51,6 +57,10 @@ export default new Vuex.Store({
     async updateSubmission({ commit }, payload){
       const resp = await this.$axios.post(API_PATH.submission.update.one, payload);
       resp.data && commit('UPDATE_SUBMISSIONS', resp.data);
+    },
+    async fetchProgress({commit}){
+      const resp = await this.$axios.post(API_PATH.submission.get.progress);
+      resp.data && commit('FETCH_PROGRESS', resp.data);
     }
   },
   modules: {

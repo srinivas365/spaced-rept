@@ -75,7 +75,6 @@ router.post('/submissions/summary', async (req, res) => {
   }
 });
 
-
 router.post('/submissions/insert', async (req, res) => {
   try {
     const sp_level = req.body.sp_level;
@@ -160,8 +159,29 @@ router.post('/submissions/update', async (req, res) => {
     logger.error(`Error handing inserts: ${error.stack}`);
     res.status(500).json({ status: 0 });
   }
+
 });
 
+
+router.post('/weekly_progress', async (req, res) => {
+  // Calculate the date of the most recent Monday
+  const lastMonday = moment().startOf('week').add(1, 'days').format('YYYY-MM-DD');
+
+  const data = await db.sequelize.query(`with cte as (
+    SELECT 
+        a.category, COUNT(a.id) as cnt
+    FROM
+        SP_SUBMISSION a
+    WHERE
+        done = 1
+            AND DATE(a.dtCreated) >= :lastMonday
+    GROUP BY 1)
+    select a.name as category,
+      round(coalesce(b.cnt,0) * 100 /sum(coalesce(b.cnt,0)) over ()) as progress
+        from SP_CATEGORY a left join cte b on a.name = b.category`, {type: db.sequelize.QueryTypes.SELECT, replacements: { lastMonday }, raw: true});
+  
+  res.status(200).json(data);
+})
 
 
 module.exports = router;
