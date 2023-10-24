@@ -74,6 +74,7 @@ Do whatever you want.
 
 ## Upcoming features
 1. Support Multiple users and enable Signup & Login flows 
+2. Add a customization page for categories, levels
 
 
 
