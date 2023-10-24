@@ -171,6 +171,22 @@ const getCurrentDaySubmits = async (category, type, level) => {
   return count;
 }
 
+const getOverallProgress = async (done) => {
+  const data = await db.sequelize.query(`with cte as (
+    SELECT 
+        a.category, COUNT(distinct link) as cnt
+    FROM
+        SP_SUBMISSION a
+    WHERE
+        done = :done
+        and date(dtCreated) <= curdate()
+    GROUP BY 1)
+    select a.name as x,
+      coalesce(b.cnt,0) as y
+        from SP_CATEGORY a left join cte b on a.name = b.category`, {type: db.sequelize.QueryTypes.SELECT, replacements: {done}, raw: true});
+  
+  return data;
+};
 
 module.exports = {
   getTypes,
@@ -180,5 +196,6 @@ module.exports = {
   insertSubmission,
   getAllSubmissions,
   getCurrentDaySubmits,
-  getSummary
+  getSummary,
+  getOverallProgress,
 }

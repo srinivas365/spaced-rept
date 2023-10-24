@@ -1,5 +1,6 @@
 <template>
-  <v-card color="white" class="rounded-lg" flat>
+  <div> 
+    <v-card color="white" class="rounded-lg" flat>
     <v-sheet tile height="64" class="d-flex">
       <v-toolbar flat>
         <v-btn icon class="ma-2" @click="$refs.calendar.prev()">
@@ -85,15 +86,27 @@
         </v-card>
       </v-menu>
     </v-sheet>
-  </v-card>
+    </v-card>
+    <br/><br/>
+    <VueApexCharts
+      type="treemap"
+      height="600"
+      :options="treeMapPendingOptions"
+      :series="treeMapPendingSeries"
+    ></VueApexCharts>
+  </div>
 </template>
 
 <script>
+import VueApexCharts from "vue-apexcharts";
 export default {
-  async mounted() {
+  async onActivated() {
     console.log(":::::::::::::::::on mounted");
     this.$refs.calendar.checkChange();
-    this.$store.dispatch("fetchMetadata");
+    await this.$store.dispatch("fetchMetadata");
+  },
+  components: {
+    VueApexCharts,
   },
   data: () => ({
     selectedElementLevel: "",
@@ -120,6 +133,54 @@ export default {
     levels: ["Very Easy", "Easy", "Medium", "Hard"],
     submitTypes: ["Self", "Editorial"],
     categories: ["Leetcode", "Pyspark", "HDFS", "Azure", "Databricks"],
+    treeMapOptions: {
+      legend: {
+        show: false,
+      },
+      chart: {
+        height: 350,
+        type: "treemap",
+      },
+      title: {
+        text: "Progess in each subject",
+        align: "center",
+      },
+      plotOptions: {
+        treemap: {
+          distributed: true,
+          enableShades: false,
+        },
+      },
+    },
+    treeMapPendingOptions: {
+      legend: {
+        show: false,
+      },
+      chart: {
+        height: 350,
+        type: "treemap",
+      },
+      title: {
+        text: "Pending in each subject till now",
+        align: "center",
+      },
+      plotOptions: {
+        treemap: {
+          distributed: true,
+          enableShades: false,
+        },
+      },
+      dataLabels: {
+        enabled: true,
+        style: {
+          fontSize: "12px",
+        },
+        formatter: function (text, op) {
+          return [text, op.value];
+        },
+        offsetY: -4,
+      },
+    },
   }),
   computed: {
     sp_levels() {
@@ -136,6 +197,13 @@ export default {
     },
     sp_pending_count() {
       return this.$store.state.sp_pending_count;
+    },
+    treeMapPendingSeries() {
+      return [
+        {
+          data: this.$store.state.overall_pending,
+        },
+      ];
     },
   },
   methods: {

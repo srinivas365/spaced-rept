@@ -1,5 +1,5 @@
 const express = require('express');
-const { getTypes, getLevels, getCategories, getOffset, insertSubmission, getAllSubmissions, getCurrentDaySubmits, getSummary } = require('../services');
+const { getTypes, getLevels, getCategories, getOffset, insertSubmission, getAllSubmissions, getCurrentDaySubmits, getSummary, getOverallProgress,  } = require('../services');
 const router = express.Router();
 const moment = require('moment');
 const logger = require('../config/logger');
@@ -10,12 +10,14 @@ router.post('/metadata', async (req, res) => {
     const sp_levels = await getLevels();
     const sp_types = await getTypes();
     const sp_categories = await getCategories();
+    const overall_pending = await getOverallProgress(0);
+    const overall_progress = await getOverallProgress(1);
 
-    res.status(200).json({ sp_categories, sp_levels, sp_types });
+    res.status(200).json({ sp_categories, sp_levels, sp_types, overall_pending, overall_progress });
 
   } catch (error) {
     logger.error(`Error handing metadata: ${error.stack}`);
-    res.status(500).json({ sp_categories: [], sp_levels: [], sp_types: [] });
+    res.status(500).json({ sp_categories: [], sp_levels: [], sp_types: [], overall_progress: [], overall_pending:[]});
   }
 });
 
@@ -162,10 +164,9 @@ router.post('/submissions/update', async (req, res) => {
 
 });
 
-
 router.post('/weekly_progress', async (req, res) => {
-  // Calculate the date of the most recent Monday
-  const lastMonday = moment().startOf('week').add(1, 'days').format('YYYY-MM-DD');
+  // Calculate the date of the most recent sunday
+  const lastSunday = moment().startOf('week').format('YYYY-MM-DD');
 
   const data = await db.sequelize.query(`with cte as (
     SELECT 
@@ -174,15 +175,47 @@ router.post('/weekly_progress', async (req, res) => {
         SP_SUBMISSION a
     WHERE
         done = 1
-            AND DATE(a.dtCreated) >= :lastMonday
+            AND DATE(a.dtCreated) >= :lastSunday
     GROUP BY 1)
     select a.name as category,
       round(coalesce(b.cnt,0) * 100 /sum(coalesce(b.cnt,0)) over ()) as progress
-        from SP_CATEGORY a left join cte b on a.name = b.category`, {type: db.sequelize.QueryTypes.SELECT, replacements: { lastMonday }, raw: true});
+        from SP_CATEGORY a left join cte b on a.name = b.category`, {type: db.sequelize.QueryTypes.SELECT, replacements: { lastSunday }, raw: true});
   
   res.status(200).json(data);
 })
 
+router.post('/overall_progress', async (req, res) => {
+  const data = await db.sequelize.query(`with cte as (
+    SELECT 
+        a.category, COUNT(distinct link) as cnt
+    FROM
+        SP_SUBMISSION a
+    WHERE
+        done = 1
+    GROUP BY 1)
+    select a.name as x,
+      coalesce(b.cnt,0) as y
+        from SP_CATEGORY a left join cte b on a.name = b.category`, {type: db.sequelize.QueryTypes.SELECT, raw: true});
+  
+  res.status(200).json(data);
+});
+
+router.post('/overall_pending', async (req, res) => {
+  const data = await db.sequelize.query(`with cte as (
+    SELECT 
+        a.category, COUNT(a.id) as cnt
+    FROM
+        SP_SUBMISSION a
+    WHERE
+        done = 0
+        and date(dtCreated) <= curdate()
+    GROUP BY 1)
+    select a.name as x,
+      coalesce(b.cnt,0) as y
+        from SP_CATEGORY a left join cte b on a.name = b.category`, {type: db.sequelize.QueryTypes.SELECT, raw: true});
+  
+  res.status(200).json(data);
+});
 
 module.exports = router;
 

@@ -13,13 +13,17 @@ export default new Vuex.Store({
     sp_pending_count: 0,
     sp_summary: [],
     pg_categories: [],
-    pg_values: []
+    pg_values: [],
+    overall_progress: [],
+    overall_pending: []
   },
   mutations: {
     FETCH_METADATA: (state, payload) => {
       state.sp_categories = payload.sp_categories;
       state.sp_levels = payload.sp_levels;
       state.sp_types = payload.sp_types;
+      state.overall_progress = payload.overall_progress;
+      state.overall_pending = payload.overall_pending;
     },
     UPDATE_SUBMISSIONS: (state, payload) => {
       state.sp_submissions = [ ...state.sp_submissions, ...payload];
@@ -61,7 +65,7 @@ export default new Vuex.Store({
     async fetchProgress({commit}){
       const resp = await this.$axios.post(API_PATH.submission.get.progress);
       resp.data && commit('FETCH_PROGRESS', resp.data);
-    }
+    },
   },
   modules: {
 

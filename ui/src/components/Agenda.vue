@@ -3,7 +3,7 @@
     <VueApexCharts
       type="radar"
       height="750"
-      :options="chart_options"
+      :options="radarChartOptions"
       :series="chart_series"
     ></VueApexCharts>
     <v-sheet tile height="64" class="d-flex">
@@ -96,6 +96,14 @@
         </v-card>
       </v-menu>
     </v-sheet>
+    <br/><br/>
+    <VueApexCharts
+      type="treemap"
+      height="600"
+      :options="treeMapProgressOptions"
+      :series="treeMapProgressSeries"
+    ></VueApexCharts>
+    
   </div>
 </template>
 
@@ -137,6 +145,36 @@ export default {
     levels: ["Very Easy", "Easy", "Medium", "Hard"],
     submitTypes: ["Self", "Editorial"],
     categories: ["Leetcode", "Pyspark", "HDFS", "Azure", "Databricks"],
+    treeMapProgressOptions: {
+      legend: {
+        show: false,
+      },
+      chart: {
+        height: 350,
+        type: "treemap",
+      },
+      title: {
+        text: "Progess in each subject till now",
+        align: "center",
+      },
+      plotOptions: {
+        treemap: {
+          distributed: true,
+          enableShades: false,
+        },
+      },
+      dataLabels: {
+        enabled: true,
+        style: {
+          fontSize: "12px",
+        },
+        formatter: function (text, op) {
+          return [text, op.value];
+        },
+        offsetY: -4,
+      },
+    },
+    
   }),
   computed: {
     sp_levels() {
@@ -162,7 +200,7 @@ export default {
         },
       ];
     },
-    chart_options() {
+    radarChartOptions() {
       return {
         chart: {
           height: 750,
@@ -212,6 +250,14 @@ export default {
         },
       };
     },
+    treeMapProgressSeries() {
+      return [
+        {
+          data: this.$store.state.overall_progress,
+        },
+      ];
+    },
+    
   },
   methods: {
     onSubmit() {
