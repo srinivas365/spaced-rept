@@ -68,14 +68,19 @@ const insertSubmission = async (payload) => {
   return resp;
 }
 
-const getAllSubmissions = async (from, to) => {
+const getAllSubmissions = async (from, to, category) => {
   const fromDate = moment(from).startOf('day').format('YYYY-MM-DD HH:mm:ss');
   const toDate = moment(to).endOf('day').format('YYYY-MM-DD HH:mm:ss');
 
+  let whereClause = { dtCreated: { [Op.between]: [ fromDate, toDate] } };
+
+  if(category != null){
+    whereClause['category'] = category;
+  }
+
+
   let submittedList = await db.submission.findAll({
-    where: {
-      dtCreated: { [Op.between]: [ fromDate, toDate] }
-    }
+    where: whereClause
   });
 
   const pendingCount = await db.submission.count({
@@ -84,7 +89,6 @@ const getAllSubmissions = async (from, to) => {
       done: 0
     }
   })
-
 
   submittedList = submittedList.map((submission) => ({
     id: submission.id,
@@ -104,32 +108,43 @@ const getAllSubmissions = async (from, to) => {
   return { submittedList, pendingCount };
 }
 
-const getSummary = async (from, to) => {
+const getSummary = async (from, to, category) => {
   const fromDate = moment(from).startOf('day').format('YYYY-MM-DD HH:mm:ss');
   const toDate = moment(to).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+
+  let pendingListWhereClause = {
+    done: 0,
+    dtCreated: { [Op.between]: [ fromDate, toDate] }
+  };
+
+  let doneListWhereClause = {
+    done: 1,
+    dtCreated: { [Op.between]: [ fromDate, toDate] }
+  };
+
+  if(category != null){
+    doneListWhereClause['category'] = category;
+    pendingListWhereClause['category'] = category;
+  }
 
   let pendingList = await db.submission.findAll({
     attributes: [
       [sequelize.fn('DATE', sequelize.col('dtCreated')), 'dtCreated'],
       [sequelize.fn('COUNT', sequelize.literal('1')), 'pendingCount'],
     ],
-    where: {
-      done: 0,
-      dtCreated: { [Op.between]: [ fromDate, toDate] }
-    },
+    where: pendingListWhereClause,
     group: [sequelize.fn('DATE', sequelize.col('dtCreated'))],
     raw: true
   });
+
+  
 
   let doneList = await db.submission.findAll({
     attributes: [
       [sequelize.fn('DATE', sequelize.col('dtCreated')), 'dtCreated'],
       [sequelize.fn('COUNT', sequelize.literal('1')), 'doneCount'],
     ],
-    where: {
-      done: 1,
-      dtCreated: { [Op.between]: [ fromDate, toDate] }
-    },
+    where: doneListWhereClause,
     group: [sequelize.fn('DATE', sequelize.col('dtCreated'))],
     raw: true
   });

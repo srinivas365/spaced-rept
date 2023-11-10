@@ -35,6 +35,17 @@
           label="weekdays"
           class="ma-2"
         ></v-select>
+        <v-select
+          v-model="category_filter"
+          :items="sp_categories"
+          dense
+          multiple
+          outlined
+          hide-details
+          class="ma-2"
+          label="category"
+          @input="filterByCategory"
+        ></v-select>
         <v-spacer></v-spacer>
         <v-toolbar-title v-if="$refs.calendar">
           {{ $refs.calendar.title }}
@@ -126,6 +137,7 @@ export default {
     selectedElement: null,
     selectedOpen: false,
 
+    category_filter: [],
     type: "month",
     types: ["month", "week", "day", "4day"],
     mode: "stack",
@@ -259,6 +271,11 @@ export default {
     
   },
   methods: {
+    async filterByCategory () {
+      console.log(this.$refs.calendar);
+      console.log(this.category_filter);
+      this.getEvents({ start: this.$refs.calendar.lastStart, end: this.$refs.calendar.lastEnd });
+    },
     onSubmit() {
       this.selectedEvent.type = this.selectedElementType;
       this.selectedEvent.level = this.selectedElementLevel;
@@ -275,9 +292,11 @@ export default {
     getEvents({ start, end }) {
       console.log(start.date);
       console.log(end.date);
+      console.log(this.category_filter);
       this.$store.dispatch("fetchSubmissions", {
         from: start.date,
         to: end.date,
+        categories: this.category_filter
       });
     },
     viewDay({ date }) {

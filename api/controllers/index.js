@@ -4,6 +4,7 @@ const router = express.Router();
 const moment = require('moment');
 const logger = require('../config/logger');
 const db = require('../models');
+const { Op } = require('sequelize');
 
 router.post('/metadata', async (req, res) => {
   try {
@@ -46,7 +47,6 @@ router.post('/categories', async (req, res) => {
   try {
     const sp_categories = await getCategories();
     res.json({ sp_categories });
-    res.json({ hey: "it's working" });
   } catch (error) {
     logger.error(`Error handing categories: ${error.stack}`);
     res.status(500).json({ status: 0 });
@@ -57,7 +57,16 @@ router.post('/submissions/all', async (req, res) => {
   try {
     const from = req.body.from;
     const to = req.body.to;
-    const data = await getAllSubmissions(from, to);
+    let category = req.body.categories;
+    if(category.length > 0){
+      category = {
+        [Op.in]: category
+      }
+    }else{
+      category = null;
+    }
+    
+    const data = await getAllSubmissions(from, to, category);
     res.status(200).json(data);
   } catch (error) {
     logger.error(`Error handing getting submissions: ${error.stack}`);
@@ -69,7 +78,17 @@ router.post('/submissions/summary', async (req, res) => {
   try {
     const from = req.body.from;
     const to = req.body.to;
-    const data = await getSummary(from, to);
+
+    let category = req.body.categories;
+    if(category.length > 0){
+      category = {
+        [Op.in]: category
+      }
+    }else{
+      category = null;
+    }
+    
+    const data = await getSummary(from, to, category);
     res.status(200).json(data);
   } catch (error) {
     logger.error(`Error handing getting submissions: ${error.stack}`);
