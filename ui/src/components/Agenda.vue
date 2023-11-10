@@ -6,6 +6,12 @@
       :options="radarChartOptions"
       :series="chart_series"
     ></VueApexCharts>
+    <VueApexCharts
+      type="treemap"
+      height="600"
+      :options="treeMapProgressOptions"
+      :series="treeMapProgressSeries"
+    ></VueApexCharts>
     <v-sheet tile height="64" class="d-flex">
       <v-toolbar flat>
         <v-btn icon class="ma-2" @click="$refs.calendar.prev()">
@@ -97,13 +103,6 @@
       </v-menu>
     </v-sheet>
     <br/><br/>
-    <VueApexCharts
-      type="treemap"
-      height="600"
-      :options="treeMapProgressOptions"
-      :series="treeMapProgressSeries"
-    ></VueApexCharts>
-    
   </div>
 </template>
 
