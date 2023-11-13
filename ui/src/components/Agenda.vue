@@ -45,7 +45,16 @@
           class="ma-2"
           label="category"
           @input="filterByCategory"
-        ></v-select>
+        >
+          <template v-slot:selection="{ item, index }">
+            <span
+              size="x-small"
+              v-if="index < 2"
+              class="ml-1 text-grey text-caption align-self-center"
+              >{{ index == 0 ? item + ", " : item + " ..." }}</span
+            >
+          </template>
+        </v-select>
         <v-spacer></v-spacer>
         <v-toolbar-title v-if="$refs.calendar">
           {{ $refs.calendar.title }}
@@ -113,7 +122,7 @@
         </v-card>
       </v-menu>
     </v-sheet>
-    <br/><br/>
+    <br /><br />
   </div>
 </template>
 
@@ -185,7 +194,6 @@ export default {
         offsetY: -4,
       },
     },
-    
   }),
   computed: {
     sp_levels() {
@@ -268,13 +276,15 @@ export default {
         },
       ];
     },
-    
   },
   methods: {
-    async filterByCategory () {
+    async filterByCategory() {
       console.log(this.$refs.calendar);
       console.log(this.category_filter);
-      this.getEvents({ start: this.$refs.calendar.lastStart, end: this.$refs.calendar.lastEnd });
+      this.getEvents({
+        start: this.$refs.calendar.lastStart,
+        end: this.$refs.calendar.lastEnd,
+      });
     },
     onSubmit() {
       this.selectedEvent.type = this.selectedElementType;
@@ -296,7 +306,7 @@ export default {
       this.$store.dispatch("fetchSubmissions", {
         from: start.date,
         to: end.date,
-        categories: this.category_filter
+        categories: this.category_filter,
       });
     },
     viewDay({ date }) {
