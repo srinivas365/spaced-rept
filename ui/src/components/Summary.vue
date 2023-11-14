@@ -40,7 +40,7 @@
                 size="x-small"
                 v-if="index < 2"
                 class="ml-1 text-grey text-caption align-self-center"
-                >{{ index == 0 ? item + ", " : item + " ....." }}</span
+                >{{ index == 0 ? item + ", " : item + " ..." }}</span
               >
             </template>
           </v-select>
