@@ -26,6 +26,10 @@ Spaced Repetition is a revolutionary learning technique that optimizes your memo
 <br><br>
 ![img](images/6.png)
 <br><br>
+- Filter out pending & done items based on multiple categories
+<br><br>
+![img](images/7.png)
+<br><br>
 ### Say Goodbye to Cramming
 
 Tired of last-minute cramming sessions? spaced-rept helps you move away from cramming and embrace effective learning. We believe in spaced repetition, a proven technique to help you remember what you've learned for the long term.
