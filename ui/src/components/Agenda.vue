@@ -1,5 +1,15 @@
 <template>
   <div>
+    <v-select
+      v-model="sp_tab_item"
+      @input="onTabChange"
+      :items="sp_tab_items"
+      dense
+      outlined
+      hide-details
+      class="ma-2"
+      label="Preparation category"
+    ></v-select>
     <VueApexCharts
       type="radar"
       height="750"
@@ -131,10 +141,11 @@ import VueApexCharts from "vue-apexcharts";
 
 export default {
   async mounted() {
+    localStorage.setItem('sp_tab_item', this.sp_tab_item)
     console.log(":::::::::::::::::on mounted");
+    await this.$store.dispatch("fetchMetadata", {tab: this.sp_tab_item });
+    await this.$store.dispatch("fetchProgress", {tab: this.sp_tab_item });
     await this.$refs.calendar.checkChange();
-    await this.$store.dispatch("fetchMetadata");
-    await this.$store.dispatch("fetchProgress");
   },
   components: {
     VueApexCharts,
@@ -145,6 +156,7 @@ export default {
     selectedEvent: {},
     selectedElement: null,
     selectedOpen: false,
+    sp_tab_item: 'IP',
 
     category_filter: [],
     type: "month",
@@ -196,6 +208,9 @@ export default {
     },
   }),
   computed: {
+    sp_tab_items() {
+      return this.$store.state.sp_tab_items;
+    },
     sp_levels() {
       return this.$store.state.sp_levels;
     },
@@ -278,6 +293,17 @@ export default {
     },
   },
   methods: {
+    async onTabChange() {
+      console.log("tab changed:", this.sp_tab_item);
+      localStorage.setItem('sp_tab_item', this.sp_tab_item)
+      await this.$store.dispatch("fetchMetadata", {tab: this.sp_tab_item});
+      await this.$store.dispatch("fetchProgress", {tab: this.sp_tab_item});
+      await this.$refs.calendar.checkChange();
+      this.getEvents({
+        start: this.$refs.calendar.lastStart,
+        end: this.$refs.calendar.lastEnd,
+      });
+    },
     async filterByCategory() {
       console.log(this.$refs.calendar);
       console.log(this.category_filter);
@@ -303,10 +329,13 @@ export default {
       console.log(start.date);
       console.log(end.date);
       console.log(this.category_filter);
+      console.log("cat:::::::::::::::::", this.sp_categories);
+
       this.$store.dispatch("fetchSubmissions", {
         from: start.date,
         to: end.date,
         categories: this.category_filter,
+        tab: this.sp_tab_item
       });
     },
     viewDay({ date }) {

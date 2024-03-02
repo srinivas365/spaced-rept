@@ -22,7 +22,11 @@ module.exports = (sequelize, DataTypes) => {
     dtUpdated: {
       type: DataTypes.DATE,
       defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
-    }
+    },
+    tab:{
+      type: DataTypes.STRING(255),
+      allowNull: false
+    },
   }, {
     charset: 'utf8mb4', 
     collate: 'utf8mb4_0900_ai_ci',

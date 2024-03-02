@@ -1,6 +1,7 @@
 const db = require('../models');
 const { Op } = require('sequelize');
 const moment = require('moment');
+const config = require('../config/config');
 
 const { sequelize } = require('../models');
 
@@ -18,9 +19,12 @@ const getLevels = async () => {
   return sp_types.map(x=>x.level);
 }
 
-const getCategories = async () => {
+const getCategories = async (tab) => {
   const sp_categories = await db.category.findAll({
-    attributes: ['name']
+    attributes: ['name'],
+    where: {
+      tab: tab
+    }
   })
   return sp_categories.map(x=>x.name);
 }
@@ -49,7 +53,8 @@ const insertSubmission = async (payload) => {
       type: payload[0].type,
       level: payload[0].level,
       category: payload[0].category,
-      rts: payload[0].rts
+      rts: payload[0].rts,
+      tab: payload[0].tab
     },
     {
       name: payload[1].category,
@@ -61,18 +66,19 @@ const insertSubmission = async (payload) => {
       type: payload[1].type,
       level: payload[1].level,
       category: payload[1].category,
-      rts: payload[1].rts
+      rts: payload[1].rts,
+      tab: payload[1].tab
     },
   ];
 
   return resp;
 }
 
-const getAllSubmissions = async (from, to, category) => {
+const getAllSubmissions = async (from, to, category, tab) => {
   const fromDate = moment(from).startOf('day').format('YYYY-MM-DD HH:mm:ss');
   const toDate = moment(to).endOf('day').format('YYYY-MM-DD HH:mm:ss');
 
-  let whereClause = { dtCreated: { [Op.between]: [ fromDate, toDate] } };
+  let whereClause = { dtCreated: { [Op.between]: [ fromDate, toDate] }, tab };
 
   if(category != null){
     whereClause['category'] = category;
@@ -103,23 +109,26 @@ const getAllSubmissions = async (from, to, category) => {
     category: submission.category,
     rts: submission.rts,
     done: submission.done,
+    tab: submission.tab
   }));
 
   return { submittedList, pendingCount };
 }
 
-const getSummary = async (from, to, category) => {
+const getSummary = async (from, to, category, tab) => {
   const fromDate = moment(from).startOf('day').format('YYYY-MM-DD HH:mm:ss');
   const toDate = moment(to).endOf('day').format('YYYY-MM-DD HH:mm:ss');
 
   let pendingListWhereClause = {
     done: 0,
-    dtCreated: { [Op.between]: [ fromDate, toDate] }
+    dtCreated: { [Op.between]: [ fromDate, toDate] },
+    tab: tab
   };
 
   let doneListWhereClause = {
     done: 1,
-    dtCreated: { [Op.between]: [ fromDate, toDate] }
+    dtCreated: { [Op.between]: [ fromDate, toDate] },
+    tab: tab
   };
 
   if(category != null){
@@ -136,8 +145,6 @@ const getSummary = async (from, to, category) => {
     group: [sequelize.fn('DATE', sequelize.col('dtCreated'))],
     raw: true
   });
-
-  
 
   let doneList = await db.submission.findAll({
     attributes: [
@@ -186,7 +193,7 @@ const getCurrentDaySubmits = async (category, type, level) => {
   return count;
 }
 
-const getOverallProgress = async (done) => {
+const getOverallProgress = async (tab, done) => {
   const data = await db.sequelize.query(`with cte as (
     SELECT 
         a.category, COUNT(distinct link) as cnt
@@ -198,7 +205,7 @@ const getOverallProgress = async (done) => {
     GROUP BY 1)
     select a.name as x,
       coalesce(b.cnt,0) as y
-        from SP_CATEGORY a left join cte b on a.name = b.category`, {type: db.sequelize.QueryTypes.SELECT, replacements: {done}, raw: true});
+        from SP_CATEGORY a left join cte b on a.name = b.category where a.tab = '${tab}'`, {type: db.sequelize.QueryTypes.SELECT, replacements: {done}, raw: true});
   
   return data;
 };

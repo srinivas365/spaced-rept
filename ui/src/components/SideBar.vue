@@ -88,7 +88,7 @@
 <script>
 export default {
   async mounted () {
-    this.$store.dispatch('fetchMetadata');
+    this.$store.dispatch('fetchMetadata', {tab: localStorage.getItem('sp_tab_item')});
   },
   data: () => ({
     link: '',
@@ -119,6 +119,7 @@ export default {
         sp_level: this.level,
         link: this.link,
         rts: 1,
+        tab: localStorage.getItem('sp_tab_item')
       }
 
       console.log(payload);

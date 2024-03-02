@@ -1,5 +1,15 @@
 <template>
   <div>
+    <v-select
+      v-model="sp_tab_item"
+      @input="onTabChange"
+      :items="sp_tab_items"
+      dense
+      outlined
+      hide-details
+      class="ma-2"
+      label="Preparation category"
+    ></v-select>
     <v-card color="white" class="rounded-lg" flat>
       <v-sheet tile height="64" class="d-flex">
         <v-toolbar flat>
@@ -125,7 +135,7 @@ export default {
   async onActivated() {
     console.log(":::::::::::::::::on mounted");
     this.$refs.calendar.checkChange();
-    await this.$store.dispatch("fetchMetadata");
+    await this.$store.dispatch("fetchMetadata", {tab: this.sp_tab_item});
   },
   components: {
     VueApexCharts,
@@ -136,6 +146,7 @@ export default {
     selectedEvent: {},
     selectedElement: null,
     selectedOpen: false,
+    sp_tab_item: 'IP',
 
     category_filter: [],
     type: "month",
@@ -206,6 +217,9 @@ export default {
     },
   }),
   computed: {
+    sp_tab_items() {
+      return this.$store.state.sp_tab_items;
+    },
     sp_levels() {
       return this.$store.state.sp_levels;
     },
@@ -230,6 +244,14 @@ export default {
     },
   },
   methods: {
+    async onTabChange() {
+      this.$refs.calendar.checkChange();
+      await this.$store.dispatch("fetchMetadata", {tab: this.sp_tab_item});
+      this.getEvents({
+        start: this.$refs.calendar.lastStart,
+        end: this.$refs.calendar.lastEnd,
+      });
+    },
     async filterByCategory() {
       console.log(this.$refs.calendar);
       console.log(this.category_filter);
@@ -253,6 +275,7 @@ export default {
       this.selectedElementLevel = "";
     },
     getEvents({ start, end }) {
+      console.log("fetchsummary event::::::::::::::::::;");
       console.log(start.date);
       console.log(end.date);
       console.log(this.category_filter);
@@ -260,6 +283,7 @@ export default {
         from: start.date,
         to: end.date,
         categories: this.category_filter,
+        tab: this.sp_tab_item
       });
     },
     viewDay({ date }) {

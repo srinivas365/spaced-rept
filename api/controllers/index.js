@@ -8,11 +8,13 @@ const { Op } = require('sequelize');
 
 router.post('/metadata', async (req, res) => {
   try {
+    const tab = req.body.tab || 'IP';
+
     const sp_levels = await getLevels();
     const sp_types = await getTypes();
-    const sp_categories = await getCategories();
-    const overall_pending = await getOverallProgress(0);
-    const overall_progress = await getOverallProgress(1);
+    const sp_categories = await getCategories(tab);
+    const overall_pending = await getOverallProgress(tab, 0);
+    const overall_progress = await getOverallProgress(tab, 1);
 
     res.status(200).json({ sp_categories, sp_levels, sp_types, overall_pending, overall_progress });
 
@@ -57,6 +59,7 @@ router.post('/submissions/all', async (req, res) => {
   try {
     const from = req.body.from;
     const to = req.body.to;
+    const tab = req.body.tab;
     let category = req.body.categories;
     if(category.length > 0){
       category = {
@@ -66,7 +69,7 @@ router.post('/submissions/all', async (req, res) => {
       category = null;
     }
     
-    const data = await getAllSubmissions(from, to, category);
+    const data = await getAllSubmissions(from, to, category, tab);
     res.status(200).json(data);
   } catch (error) {
     logger.error(`Error handing getting submissions: ${error.stack}`);
@@ -78,6 +81,7 @@ router.post('/submissions/summary', async (req, res) => {
   try {
     const from = req.body.from;
     const to = req.body.to;
+    const tab = req.body.tab || 'IP';
 
     let category = req.body.categories;
     if(category.length > 0){
@@ -88,7 +92,7 @@ router.post('/submissions/summary', async (req, res) => {
       category = null;
     }
     
-    const data = await getSummary(from, to, category);
+    const data = await getSummary(from, to, category, tab);
     res.status(200).json(data);
   } catch (error) {
     logger.error(`Error handing getting submissions: ${error.stack}`);
@@ -113,7 +117,8 @@ router.post('/submissions/insert', async (req, res) => {
         type: sp_type,
         level: sp_level,
         rts,
-        done: 1
+        done: 1,
+        tab: req.body.tab
       },
       {
         link: req.body.link,
@@ -122,7 +127,8 @@ router.post('/submissions/insert', async (req, res) => {
         level: sp_level,
         rts,
         done: 0,
-        dtCreated: next_revision_date
+        dtCreated: next_revision_date,
+        tab: req.body.tab
       }
     ]
     const resp = await insertSubmission(submissions);
@@ -139,7 +145,7 @@ router.post('/submissions/update', async (req, res) => {
     const rts = req.body.rts;
     const offset = await getOffset(req.body.type, req.body.level);
     const currentDaySubmits = await getCurrentDaySubmits(req.body.category, req.body.type, req.body.level);
-    const next_revision_date = moment(req.body.start).add(offset + rts + currentDaySubmits, 'days');
+    const next_revision_date = moment().add(offset + rts + currentDaySubmits, 'days');
 
     logger.info(`[Update] Type -> ${req.body.type} | Level -> ${req.body.level} | Category -> ${req.body.category} | Offset -> ${offset} | CSUBS -> ${currentDaySubmits} | NRD -> ${next_revision_date}`);
 
@@ -151,6 +157,7 @@ router.post('/submissions/update', async (req, res) => {
       dtCreated: next_revision_date,
       rts: rts + 1,
       done: 0,
+      tab: req.body.tab
     }
 
     const response = await db.submission.create(nextSubmission);
@@ -172,7 +179,8 @@ router.post('/submissions/update', async (req, res) => {
       level: response.level,
       category: response.category,
       rts: 1,
-      done: 1
+      done: 1,
+      tab: response.tab,
     }]
 
     res.status(200).json(resp);
@@ -184,7 +192,7 @@ router.post('/submissions/update', async (req, res) => {
 });
 
 router.post('/weekly_progress', async (req, res) => {
-  // Calculate the date of the most recent sunday
+  const tab = req.body.tab || 'IP';
   const lastSunday = moment().startOf('week').format('YYYY-MM-DD');
 
   const data = await db.sequelize.query(`with cte as (
@@ -198,12 +206,13 @@ router.post('/weekly_progress', async (req, res) => {
     GROUP BY 1)
     select a.name as category,
       round(coalesce(b.cnt,0) * 100 /sum(coalesce(b.cnt,0)) over ()) as progress
-        from SP_CATEGORY a left join cte b on a.name = b.category`, {type: db.sequelize.QueryTypes.SELECT, replacements: { lastSunday }, raw: true});
+        from SP_CATEGORY a left join cte b on a.name = b.category where a.tab = '${tab}'`, {type: db.sequelize.QueryTypes.SELECT, replacements: { lastSunday }, raw: true});
   
   res.status(200).json(data);
 })
 
 router.post('/overall_progress', async (req, res) => {
+  const tab = req.body.tab || 'IP';
   const data = await db.sequelize.query(`with cte as (
     SELECT 
         a.category, COUNT(distinct link) as cnt
@@ -214,12 +223,13 @@ router.post('/overall_progress', async (req, res) => {
     GROUP BY 1)
     select a.name as x,
       coalesce(b.cnt,0) as y
-        from SP_CATEGORY a left join cte b on a.name = b.category`, {type: db.sequelize.QueryTypes.SELECT, raw: true});
+        from SP_CATEGORY a left join cte b on a.name = b.category where a.tab = '${tab}'`, {type: db.sequelize.QueryTypes.SELECT, raw: true});
   
   res.status(200).json(data);
 });
 
 router.post('/overall_pending', async (req, res) => {
+  const tab = req.body.tab || 'IP';
   const data = await db.sequelize.query(`with cte as (
     SELECT 
         a.category, COUNT(a.id) as cnt
@@ -231,7 +241,7 @@ router.post('/overall_pending', async (req, res) => {
     GROUP BY 1)
     select a.name as x,
       coalesce(b.cnt,0) as y
-        from SP_CATEGORY a left join cte b on a.name = b.category`, {type: db.sequelize.QueryTypes.SELECT, raw: true});
+        from SP_CATEGORY a left join cte b on a.name = b.category where a.tab = '${tab}'`, {type: db.sequelize.QueryTypes.SELECT, raw: true});
   
   res.status(200).json(data);
 });

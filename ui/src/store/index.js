@@ -6,6 +6,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    sp_tab_items: ['IP', 'GATE'],
     sp_categories: [],
     sp_levels: [],
     sp_types: [],
@@ -42,8 +43,8 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    async fetchMetadata({ commit }){
-      const resp = await this.$axios.post(API_PATH.metadata.get.all);
+    async fetchMetadata({ commit }, payload){
+      const resp = await this.$axios.post(API_PATH.metadata.get.all, payload);
       resp.data && commit('FETCH_METADATA', resp.data );
     },
     async insertSubmission({ commit }, payload){
@@ -62,8 +63,8 @@ export default new Vuex.Store({
       const resp = await this.$axios.post(API_PATH.submission.update.one, payload);
       resp.data && commit('UPDATE_SUBMISSIONS', resp.data);
     },
-    async fetchProgress({commit}){
-      const resp = await this.$axios.post(API_PATH.submission.get.progress);
+    async fetchProgress({commit}, payload){
+      const resp = await this.$axios.post(API_PATH.submission.get.progress, payload);
       resp.data && commit('FETCH_PROGRESS', resp.data);
     },
   },

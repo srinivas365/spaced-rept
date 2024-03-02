@@ -37,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
     done: {
       type: DataTypes.TINYINT,
       defaultValue: 1
+    },
+    tab:{
+      type: DataTypes.STRING(255),
+      allowNull: false
     }
   }, {
     charset: 'utf8mb4', 
