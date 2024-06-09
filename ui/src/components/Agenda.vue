@@ -10,18 +10,6 @@
       class="ma-2"
       label="Preparation category"
     ></v-select>
-    <VueApexCharts
-      type="radar"
-      height="750"
-      :options="radarChartOptions"
-      :series="chart_series"
-    ></VueApexCharts>
-    <VueApexCharts
-      type="treemap"
-      height="600"
-      :options="treeMapProgressOptions"
-      :series="treeMapProgressSeries"
-    ></VueApexCharts>
     <v-sheet tile height="64" class="d-flex">
       <v-toolbar flat>
         <v-btn icon class="ma-2" @click="$refs.calendar.prev()">
@@ -133,6 +121,18 @@
       </v-menu>
     </v-sheet>
     <br /><br />
+    <VueApexCharts
+      type="radar"
+      height="750"
+      :options="radarChartOptions"
+      :series="chart_series"
+    ></VueApexCharts>
+    <VueApexCharts
+      type="treemap"
+      height="600"
+      :options="treeMapProgressOptions"
+      :series="treeMapProgressSeries"
+    ></VueApexCharts>
   </div>
 </template>
 
@@ -141,7 +141,8 @@ import VueApexCharts from "vue-apexcharts";
 
 export default {
   async mounted() {
-    localStorage.setItem('sp_tab_item', this.sp_tab_item)
+    await this.$store.dispatch("fetchTabs");
+    localStorage.setItem('sp_tab_item', this.sp_tab_item);
     console.log(":::::::::::::::::on mounted");
     await this.$store.dispatch("fetchMetadata", {tab: this.sp_tab_item });
     await this.$store.dispatch("fetchProgress", {tab: this.sp_tab_item });

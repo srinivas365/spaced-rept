@@ -6,7 +6,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    sp_tab_items: ['IP', 'GATE'],
+    sp_tab_items: ['IP', 'GATE', 'DSA'],
     sp_categories: [],
     sp_levels: [],
     sp_types: [],
@@ -19,6 +19,9 @@ export default new Vuex.Store({
     overall_pending: []
   },
   mutations: {
+    FETCH_TABS: (state, payload) => {
+      state.sp_tab_items = payload.sp_tab_items;
+    },
     FETCH_METADATA: (state, payload) => {
       state.sp_categories = payload.sp_categories;
       state.sp_levels = payload.sp_levels;
@@ -43,6 +46,10 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    async fetchTabs({commit}){
+      const resp = await this.$axios.post(API_PATH.metadata.get.tabs);
+      resp.data && commit('FETCH_TABS', resp.data);
+    },
     async fetchMetadata({ commit }, payload){
       const resp = await this.$axios.post(API_PATH.metadata.get.all, payload);
       resp.data && commit('FETCH_METADATA', resp.data );

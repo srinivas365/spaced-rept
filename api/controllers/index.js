@@ -1,10 +1,20 @@
 const express = require('express');
-const { getTypes, getLevels, getCategories, getOffset, insertSubmission, getAllSubmissions, getCurrentDaySubmits, getSummary, getOverallProgress,  } = require('../services');
+const { getTypes, getLevels, getCategories, getOffset, insertSubmission, getAllSubmissions, getCurrentDaySubmits, getSummary, getOverallProgress, getTabItems } = require('../services');
 const router = express.Router();
 const moment = require('moment');
 const logger = require('../config/logger');
 const db = require('../models');
 const { Op } = require('sequelize');
+
+router.post('/tabs', async (req, res) => {
+  try {
+    const sp_tab_items = await getTabItems();
+    res.status(200).json({ sp_tab_items});
+  } catch (error) {
+    logger.error(`Error handing metadata: ${error.stack}`);
+    res.status(500).json({ sp_tab_items: []});
+  }
+});
 
 router.post('/metadata', async (req, res) => {
   try {

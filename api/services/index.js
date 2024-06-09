@@ -5,6 +5,13 @@ const config = require('../config/config');
 
 const { sequelize } = require('../models');
 
+const getTabItems = async () => {
+  const sp_tab_items = await db.category.findAll({
+    attributes: [[sequelize.fn('DISTINCT', sequelize.col('tab')), 'tab']]
+  })
+  return sp_tab_items.map(x=>x.tab);
+}
+
 const getTypes = async () => {
   const sp_types = await db.level_offset.findAll({
     attributes: [[sequelize.fn('DISTINCT', sequelize.col('type')), 'type']]
@@ -220,4 +227,5 @@ module.exports = {
   getCurrentDaySubmits,
   getSummary,
   getOverallProgress,
+  getTabItems
 }

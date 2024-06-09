@@ -4,6 +4,7 @@ export default {
   metadata: {
     get: {
       all: '/api/metadata',
+      tabs: '/api/tabs'
     }
   },
   submission: {
