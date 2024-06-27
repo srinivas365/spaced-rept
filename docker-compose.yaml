@@ -4,7 +4,7 @@ services:
     build:
       context: ./ui
     ports:
-      - "8080:8080"  # Map the UI container's port 80 to host port 8080
+      - "8085:8080"  # Map the UI container's port 80 to host port 8080
     depends_on:
       - api  # Ensure the API service is started before the UI
   api:
