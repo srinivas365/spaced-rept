@@ -11,3 +11,4 @@ api/config/config.js
 ui/src/config/config.js
 .DS_Store
 backup
+logs
